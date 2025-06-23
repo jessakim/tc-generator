@@ -32,8 +32,43 @@ ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
 
 @app.route('/')
 def index():
-    """Main page"""
-    return render_template('index.html')
+    """Main page with test types data"""
+    # Provide test types data to template
+    test_types = [
+        {'value': 'Functional', 'label': 'Functional Testing'},
+        {'value': 'Integration', 'label': 'Integration Testing'},
+        {'value': 'Security', 'label': 'Security Testing'},
+        {'value': 'Performance', 'label': 'Performance Testing'},
+        {'value': 'Usability', 'label': 'Usability Testing'},
+        {'value': 'Accessibility', 'label': 'Accessibility Testing'},
+        {'value': 'API', 'label': 'API Testing'},
+        {'value': 'Database', 'label': 'Database Testing'},
+        {'value': 'Mobile', 'label': 'Mobile Testing'},
+        {'value': 'Cross-browser', 'label': 'Cross-browser Testing'},
+        {'value': 'UAT', 'label': 'User Acceptance Testing'},
+        {'value': 'Regression', 'label': 'Regression Testing'}
+    ]
+    
+    return render_template('index.html', test_types=test_types)
+
+@app.route('/api/test-types')
+def get_test_types():
+    """Get available test types"""
+    test_types = [
+        {'value': 'Functional', 'label': 'Functional Testing'},
+        {'value': 'Integration', 'label': 'Integration Testing'},
+        {'value': 'Security', 'label': 'Security Testing'},
+        {'value': 'Performance', 'label': 'Performance Testing'},
+        {'value': 'Usability', 'label': 'Usability Testing'},
+        {'value': 'Accessibility', 'label': 'Accessibility Testing'},
+        {'value': 'API', 'label': 'API Testing'},
+        {'value': 'Database', 'label': 'Database Testing'},
+        {'value': 'Mobile', 'label': 'Mobile Testing'},
+        {'value': 'Cross-browser', 'label': 'Cross-browser Testing'},
+        {'value': 'UAT', 'label': 'User Acceptance Testing'},
+        {'value': 'Regression', 'label': 'Regression Testing'}
+    ]
+    return jsonify(test_types)
 
 @app.route('/health')
 def health():
