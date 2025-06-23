@@ -1,0 +1,21 @@
+eature: Login Testing
+
+Scenario: User login flow
+  Given I am on the login page
+  When I enter my username and password
+  And I click the login button
+  Then I should be logged in successfully
+  And I should see the dashboard
+
+Scenario: Search functionality  
+  Given I am on the home page
+  When I search for "laptop computer"
+  Then I should see search results
+  And the results should contain relevant items
+
+Scenario: Shopping cart
+  Given I have products in my cart
+  When I proceed to checkout
+  And I enter my payment details
+  Then I should complete the purchase
+  And I should receive confirmation
