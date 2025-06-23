@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JuneSample Test Case Generator</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            margin: 20px auto;
+            max-width: 1200px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px 20px 0 0;
+            text-align: center;
+        }
+        
+        .form-section {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .test-case-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 5px solid #4f46e5;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .test-case-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .priority-high { border-left-color: #ef4444; }
+        .priority-medium { border-left-color: #f59e0b; }
+        .priority-low { border-left-color: #10b981; }
+        
+        .test-type-badge {
+            font-size: 0.8em;
+            padding: 0.3em 0.8em;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        
+        .btn-generate {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(79, 70, 229, 0.4);
+        }
+        
+        .loading-spinner {
+            display: none;
+        }
+        
+        .results-section {
+            display: none;
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .export-buttons {
+            margin-top: 20px;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .custom-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 15px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .custom-checkbox:hover {
+            border-color: #4f46e5;
+            background: #f8fafc;
+        }
+        
+        .custom-checkbox input:checked + label {
+            color: #4f46e5;
+            font-weight: 600;
+        }
+        
+        .alert-custom {
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .version-info {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+        }
+        
+        .feature-highlight {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid p-4">
+        <div class="main-container">
+            <!-- Header -->
+            <div class="header">
+                <h1><i class="fas fa-robot me-3"></i>JuneSample Test Case Generator</h1>
+                <p class="mb-0">Transform your user stories into comprehensive test suites</p>
+                <div class="mt-2">
+                    <small>Version 1.0.0</small>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="p-4">
+                <!-- Feature Highlight -->
+                <div class="feature-highlight">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5><i class="fas fa-sparkles me-2"></i>Generate 8-15 Test Cases in Seconds</h5>
+                            <p class="mb-0">Save 80% of your time with AI-powered test case generation. Just enter your user story and watch the magic happen!</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <button class="btn btn-light btn-sm" onclick="showQuickDemo()">
+                                <i class="fas fa-play me-2"></i>Quick Demo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Input Form -->
+                <div class="row">
+                    <div class="col-lg-8">
+                        <form id="testCaseForm">
+                            <!-- User Story Section -->
+                            <div class="form-section">
+                                <h4><i class="fas fa-book me-2"></i>User Story Details</h4>
+                                <div class="mb-3">
+                                    <label for="userStoryTitle" class="form-label fw-bold">User Story Title *</label>
+                                    <input type="text" class="form-control form-control-lg" id="userStoryTitle" 
+                                           placeholder="As a user, I want to..." required maxlength="200">
+                                    <div class="form-text">
+                                        <span id="titleCounter">0</span>/200 characters
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="acceptanceCriteria" class="form-label fw-bold">Acceptance Criteria *</label>
+                                    <textarea class="form-control" id="acceptanceCriteria" rows="6" 
+                                              placeholder="Given... When... Then..." required maxlength="5000"></textarea>
+                                    <div class="form-text">
+                                        <span id="criteriaCounter">0</span>/5000 characters. Use Given-When-Then format for best results.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Test Configuration Section -->
+                            <div class="form-section">
+                                <h4><i class="fas fa-cogs me-2"></i>Test Configuration</h4>
+                                
+                                <!-- Test Types -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Test Types * <span class="text-danger">(Select at least one)</span></label>
+                                    <div class="checkbox-group" id="testTypesGroup">
+                                        {% for test_type in test_types %}
+                                        <div class="custom-checkbox">
+                                            <input type="checkbox" id="{{ test_type.lower() }}" name="testTypes" value="{{ test_type }}" 
+                                                   {% if test_type == 'Functional' %}checked{% endif %}>
+                                            <label for="{{ test_type.lower() }}">{{ test_type }}</label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="invalid-feedback" id="testTypesError"></div>
+                                </div>
+                                
+                                <!-- Additional Options -->
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="includeEdgeCases">
+                                                <label class="form-check-label fw-bold" for="includeEdgeCases">
+                                                    <i class="fas fa-exclamation-triangle me-2"></i>Include Edge Cases
+                                                </label>
+                                                <div class="form-text">Boundary conditions and unusual scenarios</div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="includeNegativeCases">
+                                                <label class="form-check-label fw-bold" for="includeNegativeCases">
+                                                    <i class="fas fa-times-circle me-2"></i>Include Negative Test Cases
+                                                </label>
+                                                <div class="form-text">Error handling and invalid input scenarios</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="priorityLevel" class="form-label fw-bold">Priority Level</label>
+                                            <select class="form-select" id="priorityLevel">
+                                                {% for priority in priority_levels %}
+                                                <option value="{{ priority }}" {% if priority == 'Medium' %}selected{% endif %}>{{ priority }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="complexity" class="form-label fw-bold">Complexity Level</label>
+                                            <select class="form-select" id="complexity">
+                                                {% for complexity_level in complexity_levels %}
+                                                <option value="{{ complexity_level }}" {% if complexity_level == 'Medium' %}selected{% endif %}>{{ complexity_level }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Generate Button -->
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary btn-generate" id="generateBtn">
+                                    <i class="fas fa-magic me-2"></i>Generate Test Cases
+                                </button>
+                                <div class="loading-spinner mt-3" id="loadingSpinner">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Generating...</span>
+                                    </div>
+                                    <p class="mt-2 text-muted">Crafting your test cases...</p>
+                                    <div class="progress mt-2" style="width: 200px; margin: 0 auto;">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                             role="progressbar" style="width: 0%" id="progressBar"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Info Panel -->
+                    <div class="col-lg-4">
+                        <div class="form-section">
+                            <h5><i class="fas fa-info-circle me-2"></i>How it works</h5>
+                            <ol class="list-unstyled">
+                                <li class="mb-2"><i class="fas fa-edit text-primary me-2"></i>Enter your user story details</li>
+                                <li class="mb-2"><i class="fas fa-check-square text-primary me-2"></i>Select test types and options</li>
+                                <li class="mb-2"><i class="fas fa-robot text-primary me-2"></i>AI generates comprehensive test cases</li>
+                                <li class="mb-2"><i class="fas fa-download text-primary me-2"></i>Export in multiple formats</li>
+                            </ol>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h5><i class="fas fa-lightbulb me-2"></i>Tips for better results</h5>
+                            <ul class="list-unstyled small">
+                                <li class="mb-2">• Write clear, specific acceptance criteria</li>
+                                <li class="mb-2">• Include business rules and constraints</li>
+                                <li class="mb-2">• Mention data formats and validation rules</li>
+                                <li class="mb-2">• Select appropriate test types for your feature</li>
+                                <li class="mb-2">• Use Given-When-Then format for criteria</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h5><i class="fas fa-chart-line me-2"></i>Test Types Guide</h5>
+                            <div class="accordion accordion-flush" id="testTypesAccordion">
+                                <div class="accordion-item">
+                                    <h6 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#functionalInfo">
+                                            Functional Testing
+                                        </button>
+                                    </h6>
+                                    <div id="functionalInfo" class="accordion-collapse collapse" data-bs-parent="#testTypesAccordion">
+                                        <div class="accordion-body small">
+                                            Tests core functionality and features to ensure they work as expected.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h6 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#securityInfo">
+                                            Security Testing
+                                        </button>
+                                    </h6>
+                                    <div id="securityInfo" class="accordion-collapse collapse" data-bs-parent="#testTypesAccordion">
+                                        <div class="accordion-body small">
+                                            Tests for vulnerabilities, access controls, and data protection.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Results Section -->
+                <div class="results-section" id="resultsSection">
+                    <hr class="my-5">
+                    
+                    <!-- Generation Success Alert -->
+                    <div class="alert alert-success alert-custom" id="successAlert" style="display: none;">
+                        <h5><i class="fas fa-check-circle me-2"></i>Test Cases Generated Successfully!</h5>
+                        <p class="mb-0">Your test cases are ready. Review them below and export when ready.</p>
+                    </div>
+                    
+                    <!-- Stats -->
+                    <div class="row mb-4" id="statsRow">
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <h3 id="totalCount">0</h3>
+                                <p class="mb-0">Test Cases Generated</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <h3 id="highPriorityCount">0</h3>
+                                <p class="mb-0">High Priority</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <h3 id="testTypesCount">0</h3>
+                                <p class="mb-0">Test Types</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <h3 id="estimatedTime">0</h3>
+                                <p class="mb-0">Est. Time Saved (hrs)</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Export Buttons -->
+                    <div class="export-buttons text-center mb-4">
+                        <button class="btn btn-outline-primary me-2" onclick="exportTestCases('json')">
+                            <i class="fas fa-file-code me-2"></i>Export JSON
+                        </button>
+                        <button class="btn btn-outline-success me-2" onclick="exportTestCases('csv')">
+                            <i class="fas fa-file-csv me-2"></i>Export CSV
+                        </button>
+                        <button class="btn btn-outline-info" onclick="copyToClipboard()">
+                            <i class="fas fa-copy me-2"></i>Copy All
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="printTestCases()">
+                            <i class="fas fa-print me-2"></i>Print
+                        </button>
+                    </div>
+                    
+                    <!-- Filter Controls -->
+                    <div class="mb-3">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <select class="form-select form-select-sm" id="priorityFilter">
+                                    <option value="">All Priorities</option>
+                                    <option value="High">High Priority</option>
+                                    <option value="Medium">Medium Priority</option>
+                                    <option value="Low">Low Priority</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select form-select-sm" id="typeFilter">
+                                    <option value="">All Types</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select form-select-sm" id="categoryFilter">
+                                    <option value="">All Categories</option>
+                                    <option value="Positive">Positive</option>
+                                    <option value="Negative">Negative</option>
+                                    <option value="Edge Case">Edge Case</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-outline-secondary btn-sm w-100" onclick="resetFilters()">
+                                    <i class="fas fa-undo me-2"></i>Reset Filters
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Test Cases Container -->
+                    <div id="testCasesContainer">
+                        <!-- Test cases will be populated here -->
+                    </div>
+                    
+                    <!-- Load More Button (for large sets) -->
+                    <div class="text-center mt-4" id="loadMoreContainer" style="display: none;">
+                        <button class="btn btn-outline-primary" onclick="loadMoreTestCases()">
+                            <i class="fas fa-plus me-2"></i>Load More Test Cases
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div class="modal fade" id="errorModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Error</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="errorModalBody">
+                    Error message will appear here
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let generatedTestCases = [];
+        let filteredTestCases = [];
+        let displayedCount = 0;
+        const itemsPerPage = 5;
+        
+        // Character counters
+        document.getElementById('userStoryTitle').addEventListener('input', function() {
+            document.getElementById('titleCounter').textContent = this.value.length;
+        });
+        
+        document.getElementById('acceptanceCriteria').addEventListener('input', function() {
+            document.getElementById('criteriaCounter').textContent = this.value.length;
+        });
+        
+        // Form submission
+        document.getElementById('testCaseForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            await generateTestCases();
+        });
+        
+        // Filter event listeners
+        document.getElementById('priorityFilter').addEventListener('change', applyFilters);
+        document.getElementById('typeFilter').addEventListener('change', applyFilters);
+        document.getElementById('categoryFilter').addEventListener('change', applyFilters);
+        
+        async function generateTestCases() {
+            const submitBtn = document.getElementById('generateBtn');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const resultsSection = document.getElementById('resultsSection');
+            const progressBar = document.getElementById('progressBar');
+            
+            // Reset UI
+            submitBtn.disabled = true;
+            loadingSpinner.style.display = 'block';
+            resultsSection.style.display = 'none';
+            
+            // Animate progress bar
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 10;
+                if (progress > 90) progress = 90;
+                progressBar.style.width = progress + '%';
+            }, 200);
+            
+            // Validate form
+            if (!validateForm()) {
+                clearInterval(progressInterval);
+                submitBtn.disabled = false;
+                loadingSpinner.style.display = 'none';
+                return;
+            }
+            
+            // Collect form data
+            const formData = {
+                user_story_title: document.getElementById('userStoryTitle').value.trim(),
+                acceptance_criteria: document.getElementById('acceptanceCriteria').value.trim(),
+                test_types: Array.from(document.querySelectorAll('input[name="testTypes"]:checked')).map(cb => cb.value),
+                include_edge_cases: document.getElementById('includeEdgeCases').checked,
+                include_negative_cases: document.getElementById('includeNegativeCases').checked,
+                priority_level: document.getElementById('priorityLevel').value,
+                complexity: document.getElementById('complexity').value
+            };
+            
+            try {
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                // Complete progress
+                clearInterval(progressInterval);
+                progressBar.style.width = '100%';
+                
+                if (!response.ok || result.error || !result.success) {
+                    throw new Error(result.error || 'Failed to generate test cases');
+                }
+                
+                // Store and display results
+                generatedTestCases = result.test_cases || [];
+                filteredTestCases = [...generatedTestCases];
+                
+                displayResults(result);
+                showSuccessAlert();
+                
+                // Show results section
+                resultsSection.style.display = 'block';
+                resultsSection.scrollIntoView({ behavior: 'smooth' });
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showErrorModal('Failed to generate test cases: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                loadingSpinner.style.display = 'none';
+                clearInterval(progressInterval);
+            }
+        }
+        
+        function validateForm() {
+            const title = document.getElementById('userStoryTitle').value.trim();
+            const criteria = document.getElementById('acceptanceCriteria').value.trim();
+            const testTypes = document.querySelectorAll('input[name="testTypes"]:checked');
+            
+            if (!title) {
+                showErrorModal('Please enter a user story title');
+                return false;
+            }
+            
+            if (title.length < 10) {
+                showErrorModal('User story title must be at least 10 characters long');
+                return false;
+            }
+            
+            if (!criteria) {
+                showErrorModal('Please enter acceptance criteria');
+                return false;
+            }
+            
+            if (criteria.length < 20) {
+                showErrorModal('Acceptance criteria must be at least 20 characters long');
+                return false;
+            }
+            
+            if (testTypes.length === 0) {
+                showErrorModal('Please select at least one test type');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        function displayResults(result) {
+            // Update statistics
+            updateStats(result);
+            
+            // Update filter dropdowns
+            updateFilterDropdowns();
+            
+            // Display test cases
+            displayedCount = 0;
+            displayTestCases();
+        }
+        
+        function updateStats(result) {
+            const totalCount = result.test_cases?.length || 0;
+            const highPriorityCount = result.test_cases?.filter(tc => tc.priority === 'High').length || 0;
+            const testTypes = [...new Set(result.test_cases?.map(tc => tc.test_type) || [])];
+            const estimatedTimeSaved = Math.round(totalCount * 0.5);
+            
+            document.getElementById('totalCount').textContent = totalCount;
+            document.getElementById('highPriorityCount').textContent = highPriorityCount;
+            document.getElementById('testTypesCount').textContent = testTypes.length;
+            document.getElementById('estimatedTime').textContent = estimatedTimeSaved;
+        }
+        
+        function updateFilterDropdowns() {
+            const typeFilter = document.getElementById('typeFilter');
+            const types = [...new Set(generatedTestCases.map(tc => tc.test_type))];
+            
+            // Clear existing options except "All Types"
+            typeFilter.innerHTML = '<option value="">All Types</option>';
+            
+            // Add unique test types
+            types.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                typeFilter.appendChild(option);
+            });
+        }
+        
+        function displayTestCases() {
+            const container = document.getElementById('testCasesContainer');
+            const loadMoreContainer = document.getElementById('loadMoreContainer');
+            
+            // Show test cases in batches
+            const endIndex = Math.min(displayedCount + itemsPerPage, filteredTestCases.length);
+            const testCasesToShow = filteredTestCases.slice(displayedCount, endIndex);
+            
+            if (displayedCount === 0) {
+                container.innerHTML = '';
+            }
+            
+            testCasesToShow.forEach(testCase => {
+                const testCaseHtml = createTestCaseCard(testCase);
+                container.innerHTML += testCaseHtml;
+            });
+            
+            displayedCount = endIndex;
+            
+            // Show/hide load more button
+            if (displayedCount < filteredTestCases.length) {
+                loadMoreContainer.style.display = 'block';
+            } else {
+                loadMoreContainer.style.display = 'none';
+            }
+        }
+        
+        function createTestCaseCard(testCase) {
+            const steps = Array.isArray(testCase.test_steps) ? 
+                testCase.test_steps.map(step => `<li>${step}</li>`).join('') :
+                `<li>${testCase.test_steps}</li>`;
+            
+            return `
+                <div class="test-case-card priority-${(testCase.priority || 'medium').toLowerCase()}" data-priority="${testCase.priority}" data-type="${testCase.test_type}" data-category="${testCase.category}">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h5 class="mb-1">${testCase.test_id} - ${testCase.title}</h5>
+                            <span class="test-type-badge bg-primary text-white">${testCase.test_type}</span>
+                            <span class="badge bg-${getPriorityColor(testCase.priority)} ms-2">${testCase.priority || 'Medium'}</span>
+                            ${testCase.category ? `<span class="badge bg-secondary ms-2">${testCase.category}</span>` : ''}
+                        </div>
+                        <div>
+                            <button class="btn btn-outline-primary btn-sm" onclick="expandTestCase(this)">
+                                <i class="fas fa-expand-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <p class="text-muted mb-3">${testCase.description}</p>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-list-ul me-2"></i>Preconditions</h6>
+                            <p class="small">${testCase.preconditions}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-bullseye me-2"></i>Expected Result</h6>
+                            <p class="small">${testCase.expected_result}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6><i class="fas fa-tasks me-2"></i>Test Steps</h6>
+                        <ol class="small">${steps}</ol>
+                    </div>
+                    
+                    ${testCase.test_data ? `
+                        <div class="mb-2">
+                            <h6><i class="fas fa-database me-2"></i>Test Data</h6>
+                            <p class="small bg-light p-2 rounded">${testCase.test_data}</p>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+        
+        function applyFilters() {
+            const priorityFilter = document.getElementById('priorityFilter').value;
+            const typeFilter = document.getElementById('typeFilter').value;
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            
+            filteredTestCases = generatedTestCases.filter(testCase => {
+                return (!priorityFilter || testCase.priority === priorityFilter) &&
+                       (!typeFilter || testCase.test_type === typeFilter) &&
+                       (!categoryFilter || testCase.category === categoryFilter);
+            });
+            
+            displayedCount = 0;
+            displayTestCases();
+        }
+        
+        function resetFilters() {
+            document.getElementById('priorityFilter').value = '';
+            document.getElementById('typeFilter').value = '';
+            document.getElementById('categoryFilter').value = '';
+            filteredTestCases = [...generatedTestCases];
+            displayedCount = 0;
+            displayTestCases();
+        }
+        
+        function loadMoreTestCases() {
+            displayTestCases();
+        }
+        
+        function getPriorityColor(priority) {
+            switch(priority?.toLowerCase()) {
+                case 'high': return 'danger';
+                case 'medium': return 'warning';
+                case 'low': return 'success';
+                default: return 'secondary';
+            }
+        }
+        
+        function exportTestCases(format) {
+            if (generatedTestCases.length === 0) {
+                showErrorModal('No test cases to export. Please generate test cases first.');
+                return;
+            }
+            
+            const dataParam = encodeURIComponent(JSON.stringify(generatedTestCases));
+            const url = `/api/export/${format}?data=${dataParam}`;
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        function copyToClipboard() {
+            if (generatedTestCases.length === 0) {
+                showErrorModal('No test cases to copy. Please generate test cases first.');
+                return;
+            }
+            
+            let textToCopy = `Test Cases Generated: ${new Date().toLocaleDateString()}\n`;
+            textToCopy += '='.repeat(60) + '\n\n';
+            
+            generatedTestCases.forEach((testCase) => {
+                textToCopy += `${testCase.test_id} - ${testCase.title}\n`;
+                textToCopy += `Type: ${testCase.test_type} | Priority: ${testCase.priority}\n`;
+                textToCopy += `Description: ${testCase.description}\n`;
+                textToCopy += `Preconditions: ${testCase.preconditions}\n`;
+                textToCopy += `Steps: ${Array.isArray(testCase.test_steps) ? testCase.test_steps.join('; ') : testCase.test_steps}\n`;
+                textToCopy += `Expected Result: ${testCase.expected_result}\n`;
+                if (testCase.test_data) {
+                    textToCopy += `Test Data: ${testCase.test_data}\n`;
+                }
+                textToCopy += '\n' + '-'.repeat(40) + '\n\n';
+            });
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showSuccessMessage('Test cases copied to clipboard!');
+            }).catch(err => {
+                showErrorModal('Failed to copy to clipboard: ' + err.message);
+            });
+        }
+        
+        function printTestCases() {
+            if (generatedTestCases.length === 0) {
+                showErrorModal('No test cases to print. Please generate test cases first.');
+                return;
+            }
+            
+            const printWindow = window.open('', '_blank');
+            let printContent = `
+                <html>
+                <head>
+                    <title>Test Cases - ${new Date().toLocaleDateString()}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        .test-case { page-break-inside: avoid; margin-bottom: 30px; border: 1px solid #ccc; padding: 15px; }
+                        .header { font-weight: bold; font-size: 16px; margin-bottom: 10px; }
+                        .section { margin-bottom: 10px; }
+                        .steps { margin-left: 20px; }
+                        @media print { .test-case { page-break-inside: avoid; } }
+                    </style>
+                </head>
+                <body>
+                    <h1>Generated Test Cases</h1>
+                    <p>Generated on: ${new Date().toLocaleDateString()}</p>
+                    <p>Total Test Cases: ${generatedTestCases.length}</p>
+                    <hr>
+            `;
+            
+            generatedTestCases.forEach(testCase => {
+                printContent += `
+                    <div class="test-case">
+                        <div class="header">${testCase.test_id} - ${testCase.title}</div>
+                        <div class="section"><strong>Type:</strong> ${testCase.test_type}</div>
+                        <div class="section"><strong>Priority:</strong> ${testCase.priority}</div>
+                        <div class="section"><strong>Description:</strong> ${testCase.description}</div>
+                        <div class="section"><strong>Preconditions:</strong> ${testCase.preconditions}</div>
+                        <div class="section">
+                            <strong>Test Steps:</strong>
+                            <ol class="steps">
+                                ${Array.isArray(testCase.test_steps) ? 
+                                    testCase.test_steps.map(step => `<li>${step}</li>`).join('') :
+                                    `<li>${testCase.test_steps}</li>`
+                                }
+                            </ol>
+                        </div>
+                        <div class="section"><strong>Expected Result:</strong> ${testCase.expected_result}</div>
+                        ${testCase.test_data ? `<div class="section"><strong>Test Data:</strong> ${testCase.test_data}</div>` : ''}
+                    </div>
+                `;
+            });
+            
+            printContent += '</body></html>';
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            printWindow.print();
+        }
+        
+        function expandTestCase(button) {
+            const card = button.closest('.test-case-card');
+            card.classList.toggle('expanded');
+            const icon = button.querySelector('i');
+            icon.classList.toggle('fa-expand-alt');
+            icon.classList.toggle('fa-compress-alt');
+        }
+        
+        function showSuccessAlert() {
+            const alert = document.getElementById('successAlert');
+            alert.style.display = 'block';
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+        
+        function showSuccessMessage(message) {
+            // Create temporary success toast
+            const toast = document.createElement('div');
+            toast.className = 'alert alert-success position-fixed';
+            toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            toast.innerHTML = `<i class="fas fa-check me-2"></i>${message}`;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 3000);
+        }
+        
+        function showErrorModal(message) {
+            document.getElementById('errorModalBody').textContent = message;
+            new bootstrap.Modal(document.getElementById('errorModal')).show();
+        }
+        
+        function showQuickDemo() {
+            // Fill form with demo data
+            document.getElementById('userStoryTitle').value = 'As a registered user, I want to log into my account so that I can access my personalized dashboard';
+            document.getElementById('acceptanceCriteria').value = `Given I am a registered user with valid credentials
+When I navigate to the login page
+And I enter my email and password
+And I click the login button
+Then I should be redirected to my dashboard
+And I should see a welcome message with my name
+And my session should be maintained for 24 hours`;
+            
+            // Select some test types
+            document.getElementById('functional').checked = true;
+            document.getElementById('security').checked = true;
+            document.getElementById('usability').checked = true;
+            
+            // Enable additional options
+            document.getElementById('includeEdgeCases').checked = true;
+            document.getElementById('includeNegativeCases').checked = true;
+            
+            // Update character counters
+            document.getElementById('titleCounter').textContent = document.getElementById('userStoryTitle').value.length;
+            document.getElementById('criteriaCounter').textContent = document.getElementById('acceptanceCriteria').value.length;
+            
+            showSuccessMessage('Demo data loaded! Click "Generate Test Cases" to see it in action.');
+        }
+        
+        // Auto-resize textarea
+        document.addEventListener('DOMContentLoaded', function() {
+            const textarea = document.getElementById('acceptanceCriteria');
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+            
+            // Initialize tooltips if any
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+Enter to generate
+            if (e.ctrlKey && e.key === 'Enter') {
+                e.preventDefault();
+                generateTestCases();
+            }
+            
+            // Ctrl+Shift+C to copy
+            if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+                e.preventDefault();
+                copyToClipboard();
+            }
+        });
+    </script>
+</body>
+</html>
