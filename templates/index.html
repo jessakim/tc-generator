@@ -589,20 +589,37 @@
             };
             
             try {
-                // Simulate API call
-                await new Promise(resolve => setTimeout(resolve, 2500));
+                // Call your Flask API
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
                 
-                // Generate mock test cases
-                generatedTestCases = generateMockTestCases(formData);
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.error || `Server error: ${response.status}`);
+                }
+                
+                if (!result.success || !result.test_cases) {
+                    throw new Error(result.error || 'Invalid response from server');
+                }
+                
+                // Use real API response
+                generatedTestCases = result.test_cases;
                 filteredTestCases = [...generatedTestCases];
                 
                 displayResults();
                 resultsSection.style.display = 'block';
                 resultsSection.scrollIntoView({ behavior: 'smooth' });
                 
-                showToast('Test cases generated successfully!', 'success');
+                showToast(`Successfully generated ${result.total_count} test cases!`, 'success');
                 
             } catch (error) {
+                console.error('API Error:', error);
                 showToast('Failed to generate test cases: ' + error.message, 'danger');
             } finally {
                 submitBtn.disabled = false;
@@ -641,41 +658,6 @@
             }
             
             return true;
-        }
-        
-        function generateMockTestCases(formData) {
-            const testCases = [];
-            const types = formData.test_types;
-            const priorities = ['High', 'Medium', 'Low'];
-            const categories = ['Positive', 'Negative', 'Edge Case'];
-            let counter = 1;
-            
-            types.forEach(type => {
-                const casesPerType = type === 'Functional' ? 4 : 3;
-                for (let i = 0; i < casesPerType; i++) {
-                    testCases.push({
-                        test_id: `TC${counter.toString().padStart(3, '0')}`,
-                        title: `${type} Test Case ${i + 1}`,
-                        test_type: type,
-                        priority: priorities[i % 3],
-                        category: categories[i % 3],
-                        description: `Verify ${type.toLowerCase()} functionality for: ${formData.user_story_title}`,
-                        preconditions: 'User is authenticated and has appropriate permissions to access the feature',
-                        test_steps: [
-                            'Navigate to the application home page',
-                            'Authenticate with valid credentials',
-                            'Access the feature under test',
-                            'Perform the required action according to acceptance criteria',
-                            'Verify the system response'
-                        ],
-                        expected_result: `The system should successfully handle the ${type.toLowerCase()} requirement and display appropriate feedback to the user`,
-                        test_data: 'Test data will be provided based on the specific test scenario and requirements'
-                    });
-                    counter++;
-                }
-            });
-            
-            return testCases;
         }
         
         function displayResults() {
@@ -803,31 +785,25 @@
                 return;
             }
             
-            let content, filename, mimeType;
-            
-            if (format === 'json') {
-                content = JSON.stringify(generatedTestCases, null, 2);
-                filename = 'test_cases.json';
-                mimeType = 'application/json';
-            } else if (format === 'csv') {
-                const headers = 'Test ID,Title,Type,Priority,Category,Description,Preconditions,Expected Result\n';
-                const rows = generatedTestCases.map(tc => 
-                    `"${tc.test_id}","${tc.title}","${tc.test_type}","${tc.priority}","${tc.category}","${tc.description}","${tc.preconditions}","${tc.expected_result}"`
-                ).join('\n');
-                content = headers + rows;
-                filename = 'test_cases.csv';
-                mimeType = 'text/csv';
+            try {
+                // Use your Flask API export endpoint
+                const dataParam = encodeURIComponent(JSON.stringify(generatedTestCases));
+                const url = `/api/export/${format}?data=${dataParam}`;
+                
+                // Create download link
+                const link = document.createElement('a');
+                link.href = url;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showToast(`Test cases exported as ${format.toUpperCase()}`, 'success');
+                
+            } catch (error) {
+                console.error('Export error:', error);
+                showToast('Failed to export test cases: ' + error.message, 'danger');
             }
-            
-            const blob = new Blob([content], { type: mimeType });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = filename;
-            link.click();
-            URL.revokeObjectURL(url);
-            
-            showToast(`Test cases exported as ${format.toUpperCase()}`, 'success');
         }
         
         function copyToClipboard() {
