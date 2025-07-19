@@ -293,173 +293,6 @@
                         
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <div class="test-section">
-                                    <h6><i class="fas fa-clipboard-list me-2"></i>Preconditions</h6>
-                                    <p class="small text-muted mb-0">${testCase.preconditions}</p>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="test-section">
-                                    <h6><i class="fas fa-bullseye me-2"></i>Expected Result</h6>
-                                    <p class="small text-muted mb-0">${testCase.expected_result}</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="test-section mb-3">
-                            <h6><i class="fas fa-tasks me-2"></i>Test Steps</h6>
-                            <ol class="small">${steps}</ol>
-                        </div>
-                        
-                        <div class="test-section">
-                            <h6><i class="fas fa-database me-2"></i>Test Data</h6>
-                            <p class="small text-muted mb-0">${testCase.test_data}</p>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        function applyFilters() {
-            const priorityFilter = document.getElementById('priorityFilter').value;
-            const typeFilter = document.getElementById('typeFilter').value;
-            const categoryFilter = document.getElementById('categoryFilter').value;
-            
-            filteredTestCases = generatedTestCases.filter(testCase => {
-                return (!priorityFilter || testCase.priority === priorityFilter) &&
-                       (!typeFilter || testCase.test_type === typeFilter) &&
-                       (!categoryFilter || testCase.category === categoryFilter);
-            });
-            
-            displayTestCases();
-        }
-        
-        function resetFilters() {
-            document.getElementById('priorityFilter').value = '';
-            document.getElementById('typeFilter').value = '';
-            document.getElementById('categoryFilter').value = '';
-            filteredTestCases = [...generatedTestCases];
-            displayTestCases();
-        }
-        
-        function exportTestCases(format) {
-            if (generatedTestCases.length === 0) {
-                showToast('No test cases to export. Please generate test cases first.', 'warning');
-                return;
-            }
-            
-            let content, filename, mimeType;
-            
-            if (format === 'json') {
-                content = JSON.stringify(generatedTestCases, null, 2);
-                filename = 'test_cases.json';
-                mimeType = 'application/json';
-            } else if (format === 'csv') {
-                const headers = 'Test ID,Title,Type,Priority,Category,Description,Preconditions,Expected Result\n';
-                const rows = generatedTestCases.map(tc => 
-                    `"${tc.test_id}","${tc.title}","${tc.test_type}","${tc.priority}","${tc.category}","${tc.description}","${tc.preconditions}","${tc.expected_result}"`
-                ).join('\n');
-                content = headers + rows;
-                filename = 'test_cases.csv';
-                mimeType = 'text/csv';
-            }
-            
-            const blob = new Blob([content], { type: mimeType });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = filename;
-            link.click();
-            URL.revokeObjectURL(url);
-            
-            showToast(`Test cases exported as ${format.toUpperCase()}`, 'success');
-        }
-        
-        function copyToClipboard() {
-            if (generatedTestCases.length === 0) {
-                showToast('No test cases to copy. Please generate test cases first.', 'warning');
-                return;
-            }
-            
-            let textToCopy = `Test Cases Generated: ${new Date().toLocaleDateString()}\n`;
-            textToCopy += '='.repeat(60) + '\n\n';
-            
-            generatedTestCases.forEach((testCase) => {
-                textToCopy += `${testCase.test_id} - ${testCase.title}\n`;
-                textToCopy += `Type: ${testCase.test_type} | Priority: ${testCase.priority} | Category: ${testCase.category}\n`;
-                textToCopy += `Description: ${testCase.description}\n`;
-                textToCopy += `Preconditions: ${testCase.preconditions}\n`;
-                textToCopy += `Steps: ${testCase.test_steps.join('; ')}\n`;
-                textToCopy += `Expected Result: ${testCase.expected_result}\n`;
-                textToCopy += `Test Data: ${testCase.test_data}\n\n`;
-                textToCopy += '-'.repeat(40) + '\n\n';
-            });
-            
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                showToast('Test cases copied to clipboard!', 'success');
-            }).catch(err => {
-                showToast('Failed to copy to clipboard: ' + err.message, 'danger');
-            });
-        }
-        
-        function showToast(message, type = 'info') {
-            // Create Bootstrap toast
-            const toastContainer = document.getElementById('toastContainer') || createToastContainer();
-            
-            const toastHtml = `
-                <div class="toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            <i class="fas fa-${getToastIcon(type)} me-2"></i>
-                            ${message}
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                </div>
-            `;
-            
-            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
-            const toastElement = toastContainer.lastElementChild;
-            const toast = new bootstrap.Toast(toastElement);
-            
-            toast.show();
-            
-            // Remove toast element after it's hidden
-            toastElement.addEventListener('hidden.bs.toast', () => {
-                toastElement.remove();
-            });
-        }
-        
-        function createToastContainer() {
-            const container = document.createElement('div');
-            container.id = 'toastContainer';
-            container.className = 'toast-container position-fixed top-0 end-0 p-3';
-            container.style.zIndex = '9999';
-            document.body.appendChild(container);
-            return container;
-        }
-        
-        function getToastIcon(type) {
-            const icons = {
-                'success': 'check-circle',
-                'danger': 'exclamation-triangle',
-                'warning': 'exclamation-circle',
-                'info': 'info-circle'
-            };
-            return icons[type] || 'info-circle';
-        }
-        
-        // Initialize tooltips
-        document.addEventListener('DOMContentLoaded', function() {
-            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
-        });
-    </script>
-</body>
-</html> mb-3">
-                            <div class="col-md-6">
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="includeEdgeCases">
                                     <label class="form-check-label fw-semibold" for="includeEdgeCases">
@@ -881,37 +714,201 @@
             container.innerHTML = '';
             
             filteredTestCases.forEach(testCase => {
-                const testCaseHtml = createTestCaseCard(testCase);
-                container.innerHTML += testCaseHtml;
+                const testCaseElement = createTestCaseCard(testCase);
+                container.appendChild(testCaseElement);
             });
         }
         
         function createTestCaseCard(testCase) {
-            const steps = testCase.test_steps.map((step, index) => 
-                `<li class="mb-1">${step}</li>`
-            ).join('');
-            
+            const steps = testCase.test_steps.map(step => `<li class="mb-1">${step}</li>`).join('');
             const priorityClass = `priority-${testCase.priority.toLowerCase()}`;
             const priorityBadgeClass = `badge-priority-${testCase.priority.toLowerCase()}`;
             
-            return `
-                <div class="card test-case-card ${priorityClass} mb-4">
-                    <div class="card-header">
-                        <div class="d-flex justify-content-between align-items-start">
+            const cardDiv = document.createElement('div');
+            cardDiv.className = `card test-case-card ${priorityClass} mb-4`;
+            cardDiv.innerHTML = `
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="mb-2">${testCase.test_id} - ${testCase.title}</h5>
                             <div>
-                                <h5 class="mb-2">${testCase.test_id} - ${testCase.title}</h5>
-                                <div>
-                                    <span class="badge badge-type me-2">${testCase.test_type}</span>
-                                    <span class="badge ${priorityBadgeClass} me-2">${testCase.priority}</span>
-                                    <span class="badge bg-secondary">${testCase.category}</span>
-                                </div>
+                                <span class="badge badge-type me-2">${testCase.test_type}</span>
+                                <span class="badge ${priorityBadgeClass} me-2">${testCase.priority}</span>
+                                <span class="badge bg-secondary">${testCase.category}</span>
                             </div>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <div class="test-section mb-3">
-                            <h6><i class="fas fa-info-circle me-2"></i>Description</h6>
-                            <p class="text-muted mb-0">${testCase.description}</p>
+                </div>
+                <div class="card-body">
+                    <div class="test-section mb-3">
+                        <h6><i class="fas fa-info-circle me-2"></i>Description</h6>
+                        <p class="text-muted mb-0">${testCase.description}</p>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="test-section">
+                                <h6><i class="fas fa-clipboard-list me-2"></i>Preconditions</h6>
+                                <p class="small text-muted mb-0">${testCase.preconditions}</p>
+                            </div>
                         </div>
-                        
-                        <div class="row
+                        <div class="col-md-6">
+                            <div class="test-section">
+                                <h6><i class="fas fa-bullseye me-2"></i>Expected Result</h6>
+                                <p class="small text-muted mb-0">${testCase.expected_result}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="test-section mb-3">
+                        <h6><i class="fas fa-tasks me-2"></i>Test Steps</h6>
+                        <ol class="small">${steps}</ol>
+                    </div>
+                    
+                    <div class="test-section">
+                        <h6><i class="fas fa-database me-2"></i>Test Data</h6>
+                        <p class="small text-muted mb-0">${testCase.test_data}</p>
+                    </div>
+                </div>
+            `;
+            
+            return cardDiv;
+        }
+        
+        function applyFilters() {
+            const priorityFilter = document.getElementById('priorityFilter').value;
+            const typeFilter = document.getElementById('typeFilter').value;
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            
+            filteredTestCases = generatedTestCases.filter(testCase => {
+                return (!priorityFilter || testCase.priority === priorityFilter) &&
+                       (!typeFilter || testCase.test_type === typeFilter) &&
+                       (!categoryFilter || testCase.category === categoryFilter);
+            });
+            
+            displayTestCases();
+        }
+        
+        function resetFilters() {
+            document.getElementById('priorityFilter').value = '';
+            document.getElementById('typeFilter').value = '';
+            document.getElementById('categoryFilter').value = '';
+            filteredTestCases = [...generatedTestCases];
+            displayTestCases();
+        }
+        
+        function exportTestCases(format) {
+            if (generatedTestCases.length === 0) {
+                showToast('No test cases to export. Please generate test cases first.', 'warning');
+                return;
+            }
+            
+            let content, filename, mimeType;
+            
+            if (format === 'json') {
+                content = JSON.stringify(generatedTestCases, null, 2);
+                filename = 'test_cases.json';
+                mimeType = 'application/json';
+            } else if (format === 'csv') {
+                const headers = 'Test ID,Title,Type,Priority,Category,Description,Preconditions,Expected Result\n';
+                const rows = generatedTestCases.map(tc => 
+                    `"${tc.test_id}","${tc.title}","${tc.test_type}","${tc.priority}","${tc.category}","${tc.description}","${tc.preconditions}","${tc.expected_result}"`
+                ).join('\n');
+                content = headers + rows;
+                filename = 'test_cases.csv';
+                mimeType = 'text/csv';
+            }
+            
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.click();
+            URL.revokeObjectURL(url);
+            
+            showToast(`Test cases exported as ${format.toUpperCase()}`, 'success');
+        }
+        
+        function copyToClipboard() {
+            if (generatedTestCases.length === 0) {
+                showToast('No test cases to copy. Please generate test cases first.', 'warning');
+                return;
+            }
+            
+            let textToCopy = `Test Cases Generated: ${new Date().toLocaleDateString()}\n`;
+            textToCopy += '='.repeat(60) + '\n\n';
+            
+            generatedTestCases.forEach((testCase) => {
+                textToCopy += `${testCase.test_id} - ${testCase.title}\n`;
+                textToCopy += `Type: ${testCase.test_type} | Priority: ${testCase.priority} | Category: ${testCase.category}\n`;
+                textToCopy += `Description: ${testCase.description}\n`;
+                textToCopy += `Preconditions: ${testCase.preconditions}\n`;
+                textToCopy += `Steps: ${testCase.test_steps.join('; ')}\n`;
+                textToCopy += `Expected Result: ${testCase.expected_result}\n`;
+                textToCopy += `Test Data: ${testCase.test_data}\n\n`;
+                textToCopy += '-'.repeat(40) + '\n\n';
+            });
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showToast('Test cases copied to clipboard!', 'success');
+            }).catch(err => {
+                showToast('Failed to copy to clipboard: ' + err.message, 'danger');
+            });
+        }
+        
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toastContainer') || createToastContainer();
+            
+            const toastHtml = `
+                <div class="toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="fas fa-${getToastIcon(type)} me-2"></i>
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            `;
+            
+            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+            const toastElement = toastContainer.lastElementChild;
+            const toast = new bootstrap.Toast(toastElement);
+            
+            toast.show();
+            
+            toastElement.addEventListener('hidden.bs.toast', () => {
+                toastElement.remove();
+            });
+        }
+        
+        function createToastContainer() {
+            const container = document.createElement('div');
+            container.id = 'toastContainer';
+            container.className = 'toast-container position-fixed top-0 end-0 p-3';
+            container.style.zIndex = '9999';
+            document.body.appendChild(container);
+            return container;
+        }
+        
+        function getToastIcon(type) {
+            const icons = {
+                'success': 'check-circle',
+                'danger': 'exclamation-triangle',
+                'warning': 'exclamation-circle',
+                'info': 'info-circle'
+            };
+            return icons[type] || 'info-circle';
+        }
+        
+        // Initialize tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+</body>
+</html>
